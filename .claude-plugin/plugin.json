@@ -1,0 +1,11 @@
+{
+  "name": "skills",
+  "version": "0.0.0",
+  "description": "Daniel Bacsur's skills.",
+
+  "author": {
+    "name": "Daniel Bacsur",
+    "email": "daniel@danielbacsur.dev",
+    "url": "https://danielbacsur.dev"
+  }
+}
