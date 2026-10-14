@@ -1,7 +1,7 @@
 {
   "name": "skills",
   "version": "0.0.0",
-  "description": "Daniel Bacsur's skills.",
+  "description": "Skills for getting things done with Claude, Codex, and Cursor.",
 
   "author": {
     "name": "Daniel Bacsur",

@@ -1,7 +1,7 @@
 {
   "name": "skills",
   "version": "0.0.0",
-  "description": "Daniel Bacsur's skills.",
+  "description": "Skills for getting things done with Claude, Codex, and Cursor.",
 
   "author": {
     "name": "Daniel Bacsur",
@@ -11,7 +11,7 @@
 
   "interface": {
     "displayName": "Skills",
-    "shortDescription": "Daniel Bacsur's skills.",
+    "shortDescription": "Skills for getting things done with Claude, Codex, and Cursor.",
     "developerName": "Daniel Bacsur",
     "category": "Productivity"
   }

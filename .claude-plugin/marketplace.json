@@ -1,6 +1,6 @@
 {
   "name": "danielbacsur",
-  "description": "Daniel Bacsur's skills.",
+  "description": "Skills for getting things done with Claude, Codex, and Cursor.",
 
   "owner": {
     "name": "Daniel Bacsur",
@@ -12,7 +12,7 @@
     {
       "name": "skills",
       "source": "./",
-      "description": "Daniel Bacsur's skills."
+      "description": "Skills for getting things done with Claude, Codex, and Cursor."
     }
   ]
 }
