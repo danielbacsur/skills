@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "skills.danielbacsur.com" }],
+      "has": [{ "type": "host", "value": "skills.danielbacsur.dev" }],
       "destination": "https://skills.sh/danielbacsur/skills",
       "permanent": false
     }
