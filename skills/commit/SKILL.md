@@ -9,4 +9,4 @@ After a blank line, always add a short body of two to three plain sentences that
 
 Finish with another blank line and the `Co-Authored-By` trailer your harness gives you, so you're credited as a co-author. Leave it exactly as given.
 
-Commit as `Daniel Bacsur <daniel@danielbacsur.dev>`, even when the environment sets up a different git identity. Set `user.name` and `user.email` for the repository before your first commit so both the author and the committer are correct, and never make yourself the author.
+Make `Daniel Bacsur <daniel@danielbacsur.dev>` the author of every commit by passing `--author`, and never make yourself the author. Leave the committer as the git identity the environment set up, because some environments sign commits with a key tied to that identity and changing the committer makes them show as unverified.
