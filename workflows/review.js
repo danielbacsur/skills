@@ -57,7 +57,7 @@ const scope = await agent(
   `${where}\n\nRead the pull request and its diff against the main branch. Return its head branch, ` +
   'whether it changes code at all rather than only docs or text, whether it changes anything a user sees or interacts with, ' +
   'and a two-sentence summary of the change.',
-  { label: 'scope', schema: SCOPE, model: 'haiku', effort: 'low' },
+  { label: 'scope', schema: SCOPE, model: 'haiku', effort: 'low', agentType: 'skills:skeptic' },
 )
 
 const DIMENSIONS = [
@@ -78,7 +78,7 @@ const skeptic = (f, i) => agent(
   'Fetch the branch and read the code with git show, without checking it out. Try to refute the finding: ' +
   'it is real only if a realistic input or caller makes it go wrong and the fix is worth its code. ' +
   'If you are unsure, call it refuted.',
-  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT, model: 'sonnet', effort: 'medium' },
+  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT, model: 'sonnet', effort: 'medium', agentType: 'skills:skeptic' },
 )
 const holds = v => v && !v.refuted
 
@@ -95,7 +95,7 @@ for (let round = 1; round <= MAX_ROUNDS; round++) {
     'A problem is real only if a realistic input or caller makes it go wrong and the fix is worth its code, so leave out style, ' +
     'hypotheticals and anything the request did not ask for. ' +
     `Already reported, so skip these: ${known}. Don't edit anything.`,
-    { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS },
+    { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS, agentType: 'skills:reviewer' },
   ).then(r => ({ dimension: d.key, findings: r ? r.findings : [] }))))
 
   // Only a dimension that turned up something new gets another round. Results come back as copies, so match by key.
