@@ -85,22 +85,31 @@ const holds = v => v && !v.refuted
 const seen = new Set()
 const confirmed = []
 let refuted = 0
+let active = DIMENSIONS
 
 for (let round = 1; round <= MAX_ROUNDS; round++) {
   const known = [...seen].join(', ') || 'none yet'
-  const found = (await parallel(DIMENSIONS.map(d => () => agent(
+  const results = await parallel(active.map(d => () => agent(
     `${where}\nSummary: ${scope.summary}\n\nRun git fetch origin ${scope.branch} and git checkout --detach FETCH_HEAD in your worktree, since the builder already has the branch checked out. ${d.how} ` +
     `Report only real problems this change introduces in the ${d.key} dimension, each with the file, line, what goes wrong and the fix. ` +
+    'A problem is real only if a realistic input or caller makes it go wrong and the fix is worth its code, so leave out style, ' +
+    'hypotheticals and anything the request did not ask for. ' +
     `Already reported, so skip these: ${known}. Don't edit anything.`,
     { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS },
-  )))).filter(Boolean).flatMap(r => r.findings)
+  ).then(r => ({ d, findings: r ? r.findings : [] }))))
 
+  // Only a dimension that turned up something new gets another round.
   const fresh = []
-  for (const f of found) {
-    if (seen.has(key(f))) continue
-    seen.add(key(f))
-    fresh.push(f)
+  const productive = new Set()
+  for (const { d, findings } of results.filter(Boolean)) {
+    for (const f of findings) {
+      if (seen.has(key(f))) continue
+      seen.add(key(f))
+      fresh.push(f)
+      productive.add(d)
+    }
   }
+  active = active.filter(d => productive.has(d))
   if (!fresh.length) break
 
   // One skeptic first; only a finding that survives it gets two more, and needs one of them to agree.
