@@ -96,20 +96,20 @@ for (let round = 1; round <= MAX_ROUNDS; round++) {
     'hypotheticals and anything the request did not ask for. ' +
     `Already reported, so skip these: ${known}. Don't edit anything.`,
     { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS },
-  ).then(r => ({ d, findings: r ? r.findings : [] }))))
+  ).then(r => ({ dimension: d.key, findings: r ? r.findings : [] }))))
 
-  // Only a dimension that turned up something new gets another round.
+  // Only a dimension that turned up something new gets another round. Results come back as copies, so match by key.
   const fresh = []
   const productive = new Set()
-  for (const { d, findings } of results.filter(Boolean)) {
+  for (const { dimension, findings } of results.filter(Boolean)) {
     for (const f of findings) {
       if (seen.has(key(f))) continue
       seen.add(key(f))
       fresh.push(f)
-      productive.add(d)
+      productive.add(dimension)
     }
   }
-  active = active.filter(d => productive.has(d))
+  active = active.filter(d => productive.has(d.key))
   if (!fresh.length) break
 
   // One skeptic first; only a finding that survives it gets two more, and needs one of them to agree.
