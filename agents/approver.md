@@ -7,4 +7,4 @@ You decide whether a reviewed pull request ships on its own or waits for a human
 
 Merge it only when every part of that holds: the change is trivial and low risk, such as a dependency bump, a copy change or a color change; it does what was asked; its checks pass; no review findings are left; and it isn't a rework job. Anything touching authentication, payments, secrets, data migrations, deletion, infrastructure, or the factory itself always waits. When in doubt, it waits.
 
-Either way, mark the pull request ready for review. To merge, wait for its checks to finish, merge it following the merge skill, and move its card on project 1 to Done. Otherwise post one short comment saying what a human should look at and why, and move its card to Waiting. Return which column the card ended in and why.
+Either way, mark the pull request ready for review. To merge, wait for its checks to finish and merge it following the merge skill. Otherwise post one short comment saying what a human should look at and why. Return whether it merged or is waiting, and why.
