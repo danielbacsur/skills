@@ -3,9 +3,9 @@ export const meta = {
   description: 'Review a pull request by dimension and keep only findings that survive adversarial checks',
   whenToUse: 'Reviewing a pull request before it merges, on its own or as part of the factory. Pass { pullRequest, repository?, request? } as args.',
   phases: [
-    { title: 'Scope', detail: 'work out which dimensions the change touches' },
+    { title: 'Scope', detail: 'work out which dimensions the change touches', model: 'haiku' },
     { title: 'Find', detail: 'one reviewer per dimension, repeated until a round finds nothing new' },
-    { title: 'Verify', detail: 'skeptics try to refute each finding, escalating to three only when needed' },
+    { title: 'Verify', detail: 'skeptics try to refute each finding, escalating to three only when needed', model: 'sonnet' },
   ],
 }
 
@@ -17,9 +17,10 @@ const where = `${args.repository ? `Repository ${args.repository}, p` : 'P'}ull 
 
 const SCOPE = {
   type: 'object',
-  required: ['branch', 'interface', 'summary'],
+  required: ['branch', 'code', 'interface', 'summary'],
   properties: {
     branch: { type: 'string' },
+    code: { type: 'boolean' },
     interface: { type: 'boolean' },
     summary: { type: 'string' },
   },
@@ -54,13 +55,16 @@ const VERDICT = {
 phase('Scope')
 const scope = await agent(
   `${where}\n\nRead the pull request and its diff against the main branch. Return its head branch, ` +
-  'whether it changes anything a user sees or interacts with, and a two-sentence summary of the change.',
-  { label: 'scope', schema: SCOPE },
+  'whether it changes code at all rather than only docs or text, whether it changes anything a user sees or interacts with, ' +
+  'and a two-sentence summary of the change.',
+  { label: 'scope', schema: SCOPE, model: 'haiku', effort: 'low' },
 )
 
 const DIMENSIONS = [
   { key: 'code', how: `Invoke the code-review skill with the Skill tool on pull request #${pr} and build your findings from its output, instead of reviewing by hand. Only if that skill is unavailable, review the diff yourself and say so.` },
-  { key: 'security', how: 'Invoke the security-review skill with the Skill tool on the checked-out code and build your findings from its output.' },
+  ...(scope.code ? [
+    { key: 'security', how: 'Invoke the security-review skill with the Skill tool on the checked-out code and build your findings from its output.' },
+  ] : []),
   ...(scope.interface ? [
     { key: 'ux', how: 'Review it as a user would use it: whether it does what they expect, including empty, error and loading states.' },
     { key: 'ui', how: 'Review its interface: layout, spacing, consistency with the rest of the product, and accessibility.' },
@@ -74,7 +78,7 @@ const skeptic = (f, i) => agent(
   'Fetch the branch and read the code with git show, without checking it out. Try to refute the finding: ' +
   'it is real only if a realistic input or caller makes it go wrong and the fix is worth its code. ' +
   'If you are unsure, call it refuted.',
-  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT },
+  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT, model: 'sonnet', effort: 'medium' },
 )
 const holds = v => v && !v.refuted
 
