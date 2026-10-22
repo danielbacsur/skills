@@ -1,6 +1,6 @@
 ---
-name: skeptic
-description: Reads a pull request or tries to refute one review finding for the review workflow.
+name: reader
+description: Reads a pull request and answers one question about it for the review workflow.
 tools: Bash, Read, Grep, Glob
 omitClaudeMd: true
 ---

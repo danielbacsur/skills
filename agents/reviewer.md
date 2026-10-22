@@ -1,7 +1,7 @@
 ---
 name: reviewer
-description: Finds problems in one dimension of a pull request for the review workflow.
-tools: Bash, Read, Grep, Glob, Skill, Agent
+description: Reviews a pull request with a review skill for the review workflow.
+tools: Bash, Read, Grep, Glob, Skill
 omitClaudeMd: true
 ---
 

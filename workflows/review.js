@@ -54,20 +54,20 @@ const VERDICT = {
 
 phase('Scope')
 const scope = await agent(
-  `${where}\n\nRead the pull request and its diff against the main branch. Return its head branch, ` +
+  `${where}\n\nRead the pull request and its diff against the main branch. Return its head branch name exactly as gh pr view gives it in headRefName, with no remote prefix, ` +
   'whether it changes code at all rather than only docs or text, whether it changes anything a user sees or interacts with, ' +
   'and a two-sentence summary of the change.',
-  { label: 'scope', schema: SCOPE, model: 'haiku', effort: 'low', agentType: 'skills:skeptic' },
+  { label: 'scope', schema: SCOPE, model: 'haiku', effort: 'low', agentType: 'skills:reader' },
 )
 
 const DIMENSIONS = [
-  { key: 'code', how: `Invoke the code-review skill with the Skill tool on pull request #${pr} and build your findings from its output, instead of reviewing by hand. Only if that skill is unavailable, review the diff yourself and say so.` },
+  { key: 'code', type: 'skills:reviewer', how: `Invoke the code-review skill with the Skill tool on pull request #${pr} and build your findings from its output, instead of reviewing by hand. Only if that skill is unavailable, review the diff yourself and say so.` },
   ...(scope.code ? [
-    { key: 'security', how: 'Invoke the security-review skill with the Skill tool on the checked-out code and build your findings from its output.' },
+    { key: 'security', type: 'skills:reviewer', how: 'Invoke the security-review skill with the Skill tool on the checked-out code and build your findings from its output.' },
   ] : []),
   ...(scope.interface ? [
-    { key: 'ux', how: 'Review it as a user would use it: whether it does what they expect, including empty, error and loading states.' },
-    { key: 'ui', how: 'Review its interface: layout, spacing, consistency with the rest of the product, and accessibility.' },
+    { key: 'ux', type: 'skills:reader', how: 'Review it as a user would use it: whether it does what they expect, including empty, error and loading states.' },
+    { key: 'ui', type: 'skills:reader', how: 'Review its interface: layout, spacing, consistency with the rest of the product, and accessibility.' },
   ] : []),
 ]
 
@@ -78,7 +78,7 @@ const skeptic = (f, i) => agent(
   'Fetch the branch and read the code with git show, without checking it out. Try to refute the finding: ' +
   'it is real only if a realistic input or caller makes it go wrong and the fix is worth its code. ' +
   'If you are unsure, call it refuted.',
-  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT, model: 'sonnet', effort: 'medium', agentType: 'skills:skeptic' },
+  { label: `skeptic ${i}: ${key(f)}`, phase: 'Verify', schema: VERDICT, model: 'sonnet', effort: 'medium', agentType: 'skills:reader' },
 )
 const holds = v => v && !v.refuted
 
@@ -91,11 +91,11 @@ for (let round = 1; round <= MAX_ROUNDS; round++) {
   const known = [...seen].join(', ') || 'none yet'
   const results = await parallel(active.map(d => () => agent(
     `${where}\nSummary: ${scope.summary}\n\nRun git fetch origin ${scope.branch} and git checkout --detach FETCH_HEAD in your worktree, since the builder already has the branch checked out. ${d.how} ` +
-    `Report only real problems this change introduces in the ${d.key} dimension, each with the file, line, what goes wrong and the fix. ` +
+    `Report only real problems this change introduces in the ${d.key} dimension, each with the file path relative to the repository root, line, what goes wrong and the fix. ` +
     'A problem is real only if a realistic input or caller makes it go wrong and the fix is worth its code, so leave out style, ' +
     'hypotheticals and anything the request did not ask for. ' +
     `Already reported, so skip these: ${known}. Don't edit anything.`,
-    { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS, agentType: 'skills:reviewer' },
+    { label: `${d.key} ${round}`, phase: 'Find', isolation: 'worktree', schema: FINDINGS, agentType: d.type },
   ).then(r => ({ dimension: d.key, findings: r ? r.findings : [] }))))
 
   // Only a dimension that turned up something new gets another round. Results come back as copies, so match by key.
